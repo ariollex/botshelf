@@ -1,0 +1,11 @@
+.git
+.env
+.env.local
+.cache
+.codex-build
+.codex-finalizer
+data
+/server
+*.pptx
+tmp
+work

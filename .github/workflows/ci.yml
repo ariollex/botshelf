@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Go checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Unit tests
+        run: go test ./...
+      - name: Static analysis
+        run: go vet ./...
+
+  frontend:
+    name: Frontend syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check browser script syntax
+        run: node --check cmd/server/web/app.js
+
+  deployment-config:
+    name: Compose configuration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate production Compose file
+        run: >-
+          DOMAIN=botshelf.example.ru
+          POSTGRES_PASSWORD=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+          MAX_BOT_TOKEN=ci-placeholder
+          MODERATOR_MAX_USER_IDS=1
+          docker compose config

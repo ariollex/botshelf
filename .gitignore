@@ -1,0 +1,15 @@
+data/catalog.local.json
+data/catalog.local.json.tmp
+.env
+.env.local
+.cache/
+.codex-build/
+.codex-finalizer/
+tmp/
+work/
+.DS_Store
+/server
+*.test
+coverage.out
+# Replaced by BotShelf-хакатон-v2.pptx.
+BotShelf-хакатон.pptx

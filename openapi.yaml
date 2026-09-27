@@ -1,0 +1,270 @@
+openapi: 3.1.0
+info:
+  title: BotShelf API
+  version: 1.0.0
+  description: >-
+    API открытого каталога MAX-ботов. В поиске выдаются только карточки,
+    опубликованные человеком-модератором.
+servers:
+  - url: https://{domain}
+    variables:
+      domain:
+        default: botshelf.example.ru
+paths:
+  /healthz:
+    get:
+      summary: Проверка живости процесса
+      responses:
+        '200': { $ref: '#/components/responses/StatusOK' }
+  /readyz:
+    get:
+      summary: Проверка готовности API и PostgreSQL
+      responses:
+        '200': { $ref: '#/components/responses/StatusReady' }
+        '503': { $ref: '#/components/responses/Error' }
+  /api/v1/categories:
+    get:
+      summary: Список допустимых категорий
+      responses:
+        '200':
+          description: Категории
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [categories]
+                properties:
+                  categories:
+                    type: array
+                    items: { type: string }
+  /api/v1/bots:
+    get:
+      summary: Поиск опубликованных карточек
+      parameters:
+        - in: query
+          name: q
+          description: Поиск по названию, нику, описанию и категории.
+          schema: { type: string, maxLength: 128 }
+        - in: query
+          name: category
+          schema: { type: string }
+      responses:
+        '200':
+          description: Результаты поиска
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, total]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Bot' }
+                  total: { type: integer, minimum: 0 }
+        '400': { $ref: '#/components/responses/Error' }
+  /api/v1/bots/{id}:
+    get:
+      summary: Одна опубликованная карточка
+      parameters:
+        - $ref: '#/components/parameters/BotID'
+      responses:
+        '200':
+          description: Карточка
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Bot' }
+        '404': { $ref: '#/components/responses/Error' }
+  /api/v1/submissions:
+    post:
+      summary: Отправить карточку на ручную модерацию
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SubmissionInput' }
+      responses:
+        '201':
+          description: Заявка принята и ещё не видна публично
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Submission' }
+        '400': { $ref: '#/components/responses/Error' }
+  /api/v1/auth/max:
+    post:
+      summary: Вход модератора с подписанным MAX WebApp initData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [init_data]
+              properties:
+                init_data: { type: string, minLength: 1 }
+      responses:
+        '200':
+          description: Временная bearer-сессия на 8 часов
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [token, expires_at]
+                properties:
+                  token: { type: string }
+                  expires_at: { type: string, format: date-time }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /api/v1/auth/max/identity:
+    post:
+      summary: Узнать свой MAX ID по подписанному launch data
+      description: >-
+        Используется только при первичной настройке списка модераторов.
+        Не создаёт сессию и не выдаёт права модератора.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [init_data]
+              properties:
+                init_data: { type: string, minLength: 1 }
+      responses:
+        '200':
+          description: ID текущего MAX-аккаунта после серверной проверки подписи
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [user_id]
+                properties:
+                  user_id: { type: integer, format: int64 }
+        '401': { $ref: '#/components/responses/Error' }
+  /api/v1/admin/submissions:
+    get:
+      summary: Очередь ожидающих заявок
+      security: [{ ModeratorSession: [] }]
+      responses:
+        '200':
+          description: Очередь
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, total]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Submission' }
+                  total: { type: integer }
+        '401': { $ref: '#/components/responses/Error' }
+  /api/v1/admin/submissions/{id}/approve:
+    post:
+      summary: Опубликовать проверенную заявку
+      security: [{ ModeratorSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/SubmissionID'
+      responses:
+        '200':
+          description: Опубликованная карточка
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Bot' }
+        '401': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /api/v1/admin/submissions/{id}/reject:
+    post:
+      summary: Отклонить заявку с объяснением
+      security: [{ ModeratorSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/SubmissionID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [note]
+              properties:
+                note: { type: string, minLength: 3, maxLength: 500 }
+      responses:
+        '204': { description: Заявка отклонена }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+components:
+  securitySchemes:
+    ModeratorSession:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque-session-token
+  parameters:
+    BotID:
+      in: path
+      name: id
+      required: true
+      schema: { type: string }
+    SubmissionID:
+      in: path
+      name: id
+      required: true
+      schema: { type: string }
+  responses:
+    StatusOK:
+      description: Процесс доступен
+      content:
+        application/json:
+          schema:
+            type: object
+            properties: { status: { type: string, example: ok } }
+    StatusReady:
+      description: Сервис готов
+      content:
+        application/json:
+          schema:
+            type: object
+            properties: { status: { type: string, example: ready } }
+    Error:
+      description: Ошибка запроса
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [error]
+            properties: { error: { type: string } }
+  schemas:
+    Bot:
+      type: object
+      required: [id, username, name, description, category, source_url, last_verified_at]
+      properties:
+        id: { type: string }
+        username: { type: string, example: invoice_helper_bot }
+        name: { type: string, example: Помощник по счетам }
+        description: { type: string }
+        category: { type: string, example: Финансы }
+        source_url: { type: string, format: uri }
+        last_verified_at: { type: string, format: date-time }
+    SubmissionInput:
+      type: object
+      required: [username, name, description, category, source_url, owner_contact]
+      properties:
+        username: { type: string, minLength: 11, maxLength: 60, example: invoice_helper_bot }
+        name: { type: string, minLength: 3, maxLength: 80, example: Помощник по счетам }
+        description: { type: string, minLength: 30, maxLength: 500 }
+        category: { type: string, example: Финансы }
+        source_url: { type: string, format: uri }
+        owner_contact: { type: string, minLength: 3, maxLength: 120 }
+    Submission:
+      allOf:
+        - $ref: '#/components/schemas/SubmissionInput'
+        - type: object
+          required: [id, status, created_at]
+          properties:
+            id: { type: string }
+            status: { type: string, enum: [pending, verified, rejected] }
+            created_at: { type: string, format: date-time }
+            reviewed_at: { type: string, format: date-time }
+            reviewer_id: { type: integer, format: int64 }
+            moderator_note: { type: string }

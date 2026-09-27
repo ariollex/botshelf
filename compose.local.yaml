@@ -1,0 +1,8 @@
+# Используется только вместе с compose.yaml для локального просмотра.
+# Caddy выключен: локально нужен простой http://localhost:8080, а не публичный TLS-сертификат.
+services:
+  catalog:
+    ports:
+      - "127.0.0.1:8080:8080"
+  caddy:
+    profiles: ["production"]

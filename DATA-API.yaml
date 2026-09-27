@@ -1,0 +1,47 @@
+version: "1.1"
+solution: "BotShelf"
+baseUrl: "https://<DOMAIN>"
+checks:
+  - name: "Живость сервиса"
+    method: GET
+    path: "/healthz"
+    role: "anonymous"
+    expectedStatusCodes: [200]
+    expectedContentType: "application/json"
+    requiredResponseFields: ["status"]
+  - name: "Готовность с базой данных"
+    method: GET
+    path: "/readyz"
+    role: "anonymous"
+    expectedStatusCodes: [200]
+    expectedContentType: "application/json"
+    requiredResponseFields: ["status"]
+  - name: "Поиск опубликованных ботов"
+    method: GET
+    path: "/api/v1/bots?q=%D1%81%D1%87%D1%91%D1%82"
+    role: "anonymous"
+    expectedStatusCodes: [200]
+    expectedContentType: "application/json"
+    requiredResponseFields: ["items", "total"]
+  - name: "Получение категорий"
+    method: GET
+    path: "/api/v1/categories"
+    role: "anonymous"
+    expectedStatusCodes: [200]
+    expectedContentType: "application/json"
+    requiredResponseFields: ["categories"]
+  - name: "Отправка заявки"
+    method: POST
+    path: "/api/v1/submissions"
+    role: "anonymous"
+    requestContentType: "application/json"
+    expectedStatusCodes: [201]
+    expectedContentType: "application/json"
+    requiredResponseFields: ["id", "status", "created_at"]
+    requestExample:
+      username: "invoice_helper_bot"
+      name: "Помощник по счетам"
+      description: "Помогает предпринимателю подготовить счёт и проверить обязательные реквизиты перед отправкой клиенту."
+      category: "Финансы"
+      source_url: "https://example.org/invoice-helper"
+      owner_contact: "owner@example.org"

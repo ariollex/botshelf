@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1769ff">
+    <title>BotShelf — модерация</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/admin/admin.css">
+  </head>
+  <body>
+    <main class="container admin-container">
+      <header class="admin-hero">
+        <div class="topline">
+          <a class="brand" href="/" aria-label="BotShelf — открыть каталог">
+            <span class="brand-mark" aria-hidden="true">B</span>
+            <span>BotShelf</span>
+          </a>
+          <span class="platform-label">Модерация</span>
+        </div>
+        <div class="admin-hero-copy">
+          <p class="eyebrow">Служебный раздел</p>
+          <h1>Очередь модерации</h1>
+          <p class="lead">Доступ получают только MAX-аккаунты из списка модераторов. Перед публикацией проверьте ник, описание и официальный источник.</p>
+          <div class="hero-highlights" aria-label="Правила модерации">
+            <span>Доступ через MAX</span>
+            <span>Проверка до публикации</span>
+          </div>
+        </div>
+        <a class="source admin-catalog-link" href="/">Открыть каталог</a>
+      </header>
+
+      <section id="admin-access" class="admin-access" aria-live="polite">
+        <h2>Проверяем доступ в MAX</h2>
+        <p id="access-message" class="muted">Откройте панель по служебному диплинку этого же бота.</p>
+      </section>
+
+      <section id="moderation" class="moderation" hidden aria-label="Модерация каталога">
+        <div class="moderation-heading">
+          <div>
+            <p class="eyebrow">Заявки</p>
+            <h2>Ожидают решения</h2>
+          </div>
+          <div class="moderation-actions"><button id="refresh-moderation" class="secondary" type="button">Обновить</button><button id="moderator-logout" class="secondary" type="button">Выйти</button></div>
+        </div>
+        <p id="moderation-message" class="muted" aria-live="polite"></p>
+        <div id="moderation-list" class="moderation-list"></div>
+      </section>
+    </main>
+
+    <template id="moderation-card-template">
+      <article class="moderation-card">
+        <div class="card-topline"><span class="badge"></span><time class="submitted-at muted"></time></div>
+        <h3></h3>
+        <p class="username"></p>
+        <p class="description"></p>
+        <dl class="submission-details">
+          <div><dt>Источник</dt><dd><a class="submission-source" target="_blank" rel="noopener noreferrer">Открыть</a></dd></div>
+          <div><dt>Контакт</dt><dd class="owner-contact"></dd></div>
+        </dl>
+        <div class="card-actions"><button class="approve" type="button">Опубликовать</button><button class="reject danger" type="button">Отклонить</button></div>
+      </article>
+    </template>
+    <script src="https://st.max.ru/js/max-web-app.js"></script>
+    <script src="/admin/admin.js" defer></script>
+  </body>
+</html>

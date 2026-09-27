@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1769ff">
+    <title>BotShelf - каталог MAX-ботов для бизнеса</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="container">
+      <header class="hero">
+        <div class="topline">
+          <a class="brand" href="/" aria-label="BotShelf — на главную">
+            <span class="brand-mark" aria-hidden="true">B</span>
+            <span>BotShelf</span>
+          </a>
+          <span class="platform-label">Каталог MAX</span>
+        </div>
+        <p class="eyebrow">MAX для бизнеса</p>
+        <h1>Найди бота под задачу</h1>
+        <p class="lead">BotShelf показывает только добавленных в каталог и проверенных модератором ботов. Это не полный реестр MAX.</p>
+        <div class="hero-highlights" aria-label="Преимущества каталога">
+          <span>Проверенные карточки</span>
+          <span>Прямой переход в MAX</span>
+        </div>
+      </header>
+
+      <section class="catalog-section" aria-label="Поиск ботов">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Каталог</p>
+            <h2>Поиск по бизнес-задаче</h2>
+          </div>
+          <p>Опишите задачу своими словами или выберите категорию.</p>
+        </div>
+        <div class="search-panel">
+          <label>
+            Что нужно сделать?
+            <input id="search" type="search" placeholder="Например: счёт, запись, клиент" autocomplete="off">
+          </label>
+          <label>
+            Категория
+            <select id="category">
+              <option value="">Все категории</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <div class="results-heading">
+        <h2>Подходящие боты</h2>
+        <p id="results-meta" class="muted" aria-live="polite"></p>
+      </div>
+      <section id="results" class="results" aria-live="polite"></section>
+
+      <section class="submission">
+        <div class="submission-copy">
+          <p class="eyebrow">Для разработчиков</p>
+          <h2>Добавить своего бота</h2>
+          <p>Заявка не появляется в поиске автоматически. Модератор открывает ссылку в MAX, проверяет описание и источник, затем публикует карточку.</p>
+          <p class="submission-note">Обычно достаточно указать понятное описание, официальный источник и контакт для связи.</p>
+        </div>
+        <form id="submission-form">
+          <label>Ник бота<input name="username" required minlength="11" maxlength="60" placeholder="my_business_bot"></label>
+          <label>Название<input name="name" required minlength="3" maxlength="80" placeholder="Помощник по счетам"></label>
+          <label>Задача бота<textarea name="description" required minlength="30" maxlength="500" placeholder="Кому и какую конкретную задачу помогает решить?"></textarea></label>
+          <label>Категория<select name="category" id="submission-category" required></select></label>
+          <label>Ссылка на официальный источник<input name="source_url" type="url" required placeholder="https://example.ru/bot"></label>
+          <label>Контакт для модератора<input name="owner_contact" required placeholder="email или ник MAX"></label>
+          <button type="submit">Отправить на проверку</button>
+          <p id="form-message" class="muted" aria-live="polite"></p>
+        </form>
+      </section>
+    </main>
+    <template id="bot-card-template">
+      <article class="bot-card">
+        <div class="card-topline"><span class="badge"></span><span class="verified">Проверено</span></div>
+        <h2></h2>
+        <p class="username"></p>
+        <p class="description"></p>
+        <p class="verification-date muted"></p>
+        <div class="card-actions"><a class="open-bot" target="_blank" rel="noopener noreferrer">Открыть в MAX</a><a class="source" target="_blank" rel="noopener noreferrer">Источник</a></div>
+      </article>
+    </template>
+    <!-- MAX Bridge is optional in a normal browser and available in MAX. -->
+    <script src="https://st.max.ru/js/max-web-app.js"></script>
+    <script src="/app.js" defer></script>
+  </body>
+</html>
